@@ -48,6 +48,9 @@ returns bigint as $$
 --      insert - pgq.insert_event_raw(11), a C function, inserts into current event_N_M table
 -- ----------------------------------------------------------------------
 begin
+    -- wake listeners
+    perform pg_notify('pgq.'||queue_name, null);
+    
     return pgq.insert_event_raw(queue_name, null, now(), null, null,
             ev_type, ev_data, ev_extra1, ev_extra2, ev_extra3, ev_extra4);
 end;

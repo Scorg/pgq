@@ -28,7 +28,10 @@ begin
             pgq.seq_setval(queue_event_seq, i_event_seq)
         from pgq.queue
         where queue_name = i_queue_name;
-
+    
+    -- wake listeners
+    perform pg_notify('pgq.'||i_queue_name, null);
+    
     return i_tick_id;
 end;
 $$ language plpgsql security definer; -- unsure about access
@@ -130,6 +133,9 @@ begin
 
     insert into pgq.tick (tick_queue, tick_id, tick_event_seq)
         values (q.queue_id, nextval(q.queue_tick_seq), q.event_seq);
+        
+    -- wake listeners
+    perform pg_notify('pgq.'||i_queue_name, null);
 
     return currval(q.queue_tick_seq);
 end;
